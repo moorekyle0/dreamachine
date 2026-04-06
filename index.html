@@ -157,7 +157,6 @@ body.show-cursor { cursor: default; }
     font-size: 10px; color: var(--text-dim);
     font-variant-numeric: tabular-nums; min-width: 26px;
 }
-.slider-group.hidden { display: none; }
 
 /* Select dropdowns */
 .ctrl-select {
@@ -191,6 +190,23 @@ body.show-cursor { cursor: default; }
 /* Spacer */
 .spacer { flex: 1; }
 
+/* ── Audio file label ──────────────── */
+.audio-label {
+    font-size: 9px; color: var(--text-dim);
+    letter-spacing: 0.5px; max-width: 90px;
+    overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.audio-label.has-file { color: var(--amber-dim); }
+
+/* ── Hint bar ───────────────────────── */
+#hint {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--amber-dim), transparent);
+    opacity: 0; transition: opacity 0.4s; z-index: 99; pointer-events: none;
+}
+#hint.visible { opacity: 0.3; }
+
 /* ── Range input styling ────────────── */
 input[type="range"] {
     -webkit-appearance: none; appearance: none;
@@ -215,30 +231,6 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 0 6px rgba(212, 160, 48, 0.25);
 }
 
-/* ── Morph toggle ──────────────────── */
-.btn-morph {
-    background: none; border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-dim); padding: 3px 8px;
-    border-radius: var(--radius); cursor: pointer;
-    font-family: inherit; font-size: 9px; font-weight: 600;
-    letter-spacing: 0.8px; text-transform: uppercase;
-    transition: border-color 0.3s, color 0.3s, background 0.3s;
-    flex-shrink: 0;
-}
-.btn-morph:hover { border-color: var(--border); color: var(--text); }
-.btn-morph.active {
-    border-color: var(--amber); color: var(--amber);
-    background: rgba(212, 160, 48, 0.08);
-}
-
-/* ── Hint bar ───────────────────────── */
-#hint {
-    position: fixed; bottom: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, transparent, var(--amber-dim), transparent);
-    opacity: 0; transition: opacity 0.4s; z-index: 99; pointer-events: none;
-}
-#hint.visible { opacity: 0.3; }
-
 /* ── Responsive ─────────────────────── */
 @media (max-width: 640px) {
     #controls { padding: 8px 10px 12px; gap: 8px; }
@@ -262,7 +254,7 @@ input[type="range"]::-moz-range-thumb {
             <li>Have a family history of epilepsy</li>
             <li>Are prone to photosensitive reactions</li>
         </ul>
-        <p>For best results: dark room, eyes closed, face toward screen. Headphones or speakers for audio entrainment.</p>
+        <p>For best results: dark room, eyes closed, face toward screen. Headphones or speakers for audio.</p>
         <label class="modal-check">
             <input type="checkbox" id="warning-remember"> Don't show again
         </label>
@@ -276,63 +268,35 @@ input[type="range"]::-moz-range-thumb {
     <div class="info-content">
 
         <h2>How It Works</h2>
-        <p>The Dream Machine uses flickering light to synchronize your brainwaves through <strong>photic driving</strong>. Close your eyes, face the screen in a dark room, and let the light pulse through your eyelids. Your visual cortex responds by generating geometric patterns, colors, and flowing imagery.</p>
-        <p>Pair with headphones for <strong>audio-visual entrainment</strong> — sound pulses that complement the visual flicker for a stronger combined effect.</p>
+        <p>The Dream Machine uses flickering light to synchronize your brainwaves through <strong>photic driving</strong> — your visual cortex locks onto the flicker frequency and generates geometric patterns, colors, and flowing imagery behind closed eyelids. <em>(Greenwood &amp; Skipper 2024 — flicker produces hallucinations ~3x faster than static Ganzfeld.)</em></p>
+        <p>Audio pulses complement the visual flicker for stronger combined entrainment. <em>(Tsai lab / MIT GENUS — multimodal stimulation outperforms unimodal.)</em></p>
 
         <h2>Frequency</h2>
-        <p>Flicker rate in cycles per second, targeting different brainwave states:</p>
+        <p>Flicker rate in cycles per second, constrained to the effective range for photic driving:</p>
         <ul>
-            <li><strong>Delta (1–4 Hz)</strong> — Deep sleep, unconscious states</li>
-            <li><strong>Theta (4–8 Hz)</strong> — Meditation, hypnagogia, creativity</li>
-            <li><strong>Alpha (8–13 Hz)</strong> — Relaxed awareness. <em>Sweet spot for geometric visuals. 10 Hz is the classic target.</em></li>
-            <li><strong>Beta (13–25 Hz)</strong> — Alert focus, finer-grained patterns</li>
+            <li><strong>Theta (4–8 Hz)</strong> — Meditation, hypnagogia, creativity. Works via sub-harmonic coupling to alpha.</li>
+            <li><strong>Alpha (8–13 Hz)</strong> — Relaxed awareness. <em>The sweet spot. Strongest, most reliable entrainment. 10 Hz is the classic target and peak for geometric visuals. (Frontiers 2016, Rule et al. 2011)</em></li>
+            <li><strong>Low Beta (13–15 Hz)</strong> — Alert focus, finer patterns. Diminishing returns above alpha.</li>
         </ul>
-        <p>Higher flicker frequencies produce finer, more detailed hallucinated patterns — the geometry is generated by your cortex, not the screen. <em>(Rule et al. 2011, Heller 2025.)</em></p>
-
-        <h2>Spatial Seed</h2>
-        <p>A uniform flickering field is used — your visual cortex generates its own geometric patterns. <em>Produces hallucinations ~3x faster than static Ganzfeld (Greenwood &amp; Skipper 2024).</em></p>
-        <p>Optional <strong>spatial seeds</strong> add a very faint (~5-8%) luminance modulation that can bias which cortical pattern stabilizes. <em>(Rule et al. 2011 — small spatial seeds stabilize specific hallucination forms.)</em></p>
-        <ul>
-            <li><strong>No Seed</strong> — Pure uniform field. Patterns emerge spontaneously.</li>
-            <li><strong>Radial</strong> — Faint spokes. Biases toward target/bullseye patterns.</li>
-            <li><strong>Spiral</strong> — Faint logarithmic spiral. Biases toward spiral hallucinations.</li>
-            <li><strong>Rings</strong> — Faint concentric rings. Biases toward tunnel/ring patterns.</li>
-        </ul>
-
-        <h2>Morph</h2>
-        <p>Toggle <strong>Morph</strong> (or press <strong>M</strong>) for a hands-free session. All parameters evolve slowly and continuously:</p>
-        <ul>
-            <li><strong>Frequency</strong> — drifts across delta through beta (2–22 Hz) with layered oscillators (~2.5 min primary cycle)</li>
-            <li><strong>Seed</strong> — crossfades smoothly between off, radial, spiral, and rings (~4 min cycle)</li>
-            <li><strong>Color</strong> — full spectrum hue rotation — warm ambers, cool blues, soft greens, pale violets (~5 min cycle)</li>
-            <li><strong>Waveform</strong> — visual flicker cycles sine → triangle → square (~2 min per phase)</li>
-            <li><strong>Audio mode</strong> — cycles tone → AM noise → both (~3 min per phase)</li>
-            <li><strong>Duty cycle</strong> — drifts 15–55% during square wave phases</li>
-            <li><strong>Depth</strong> — subtle breathing between 70–100%</li>
-        </ul>
-        <p>Touch any manual control to exit morph and take over.</p>
+        <p>The range is capped at 15 Hz. Below 4 Hz, photic driving is ineffective (~3% response). Above 15 Hz, entrainment weakens and seizure risk peaks at 16 Hz (~90% of photosensitive individuals). <em>(IPS meta-analysis; international photosensitivity guidelines.)</em></p>
 
         <h2>Waveform</h2>
         <ul>
-            <li><strong>Sine</strong> — Smooth, gentle transitions. Easier on the eyes.</li>
-            <li><strong>Square</strong> — Sharp on/off. <em>~35% stronger cortical response than sine (Zhu et al. 2010).</em> Use with duty cycle control.</li>
+            <li><strong>Sine</strong> — Smooth, gentle transitions. Easiest on the eyes. Good for first sessions.</li>
             <li><strong>Triangle</strong> — Linear ramp up/down. Middle ground.</li>
+            <li><strong>Square</strong> — Sharp on/off flashes. <em>~35% stronger cortical response than sine (Zhu et al. 2010). 30% duty cycle locked — optimal for hallucination induction (Amaya et al. 2023).</em></li>
         </ul>
-
-        <h2>Duty Cycle</h2>
-        <p>(Square wave only.) The fraction of each cycle spent bright. <strong>30%</strong> is optimal for hallucination induction — brief bright flashes with longer dark periods. <em>(Amaya et al. 2023 used 30% across all conditions.)</em></p>
 
         <h2>Audio</h2>
-        <p>Audio always uses a <strong>square envelope</strong> (sharp on/off) for maximum entrainment — up to 50% stronger cortical response than sine envelopes. <em>(Ferraro et al. 2025.)</em></p>
-        <ul>
-            <li><strong>Tone</strong> — Isochronal tone: 220 Hz carrier amplitude-modulated at the target frequency. The strongest single-method auditory entrainment. <em>(Ioannou et al. 2024; low carriers produce ~3x stronger ASSR — Ross et al. 2003.)</em></li>
-            <li><strong>AM Noise</strong> — Pink noise amplitude-modulated at the target frequency. More pleasant for long sessions; the noise itself becomes the entrainment vehicle.</li>
-            <li><strong>Both</strong> — Combined tone + AM noise for layered entrainment.</li>
-        </ul>
-        <p><strong>Noise</strong> slider adds unmodulated background pink noise. <em>Default off — background noise can mask the entrainment signal (Ingendoh et al. 2023). Raise only for comfort if needed.</em></p>
+        <p>A 220 Hz isochronic tone amplitude-modulated at the flicker frequency — the strongest single-method auditory entrainment. <em>(Ioannou et al. 2024; low carriers produce ~3x stronger ASSR — Ross et al. 2003; square AM envelope ~50% more effective — Ferraro et al. 2025.)</em></p>
+        <p>The audio envelope is synced to the visual waveform for maximum multisensory coherence.</p>
+
+        <h2>Descent</h2>
+        <p>The built-in journey: square wave stepping from 12→4 Hz in 0.5 Hz increments. Each step holds steady for the brain to entrain before dropping. Starts in upper alpha, passes through the 10 Hz sweet spot, then descends through theta to the edge of delta. Default 20 minutes.</p>
+        <p>Upload an audio file (&#9835;) to score the descent — the sweep syncs to your track's length. The first 60 seconds fade in: your music plays immediately while the strobe and tone gently emerge from black/silence, so the soundtrack leads.</p>
 
         <h2>Safety</h2>
-        <p>Flicker can trigger seizures in photosensitive individuals (~1 in 4,000 people). The <strong>15–25 Hz</strong> range carries the highest risk. Deep red light (660–780nm) is most provocative — this app uses amber/white. Capped at 25 Hz. <em>If you feel any discomfort, stop immediately.</em></p>
+        <p>Flickering light can trigger seizures in photosensitive individuals (~1 in 4,000 people). This app is capped at 15 Hz to stay below the peak risk zone (16–20 Hz). Uses white/amber light — saturated red light at any flicker rate is more provocative and is avoided. <em>If you feel any discomfort, stop immediately.</em></p>
 
     </div>
 </div>
@@ -343,63 +307,37 @@ input[type="range"]::-moz-range-thumb {
 
 <!-- ── Controls ─────────────────────── -->
 <div id="controls">
-    <!-- Row 1: Play, Frequency, Visual, Waveform -->
+    <!-- Row 1: Play, Frequency, Waveform -->
     <div class="ctrl-row">
         <button class="btn-play" id="btn-play" title="Play / Pause (Space)">&#9654;</button>
         <div class="freq-group">
-            <input type="range" id="freq" min="1" max="25" step="0.1" value="10">
+            <input type="range" id="freq" min="4" max="15" step="0.1" value="10">
             <div class="freq-info">
                 <span class="freq-val" id="freq-val">10.0</span>
                 <span class="freq-unit">Hz</span>
                 <span class="freq-band" id="freq-band">ALPHA</span>
             </div>
         </div>
-        <select class="ctrl-select" id="sel-seed" title="Spatial Seed (subtle bias)">
-            <option value="0" selected>No Seed</option>
-            <option value="1">Radial Seed</option>
-            <option value="2">Spiral Seed</option>
-            <option value="3">Ring Seed</option>
-        </select>
         <select class="ctrl-select" id="sel-wave" title="Waveform">
-            <option value="sine" selected>Sine</option>
-            <option value="square">Square</option>
+            <option value="sine">Sine</option>
+            <option value="square" selected>Square</option>
             <option value="triangle">Triangle</option>
         </select>
     </div>
-    <!-- Row 2: Duty, Depth, Audio mode, Vol, Noise, Preset, Timer, Info, FS -->
+    <!-- Row 2: Preset, Audio file, Vol, Timer, Info, FS -->
     <div class="ctrl-row">
-        <div class="slider-group hidden" id="duty-group">
-            <label>Duty</label>
-            <input type="range" id="duty" min="10" max="90" value="30">
-            <span class="val" id="duty-val">30%</span>
-        </div>
-        <div class="slider-group">
-            <label>Depth</label>
-            <input type="range" id="depth" min="10" max="100" value="100">
-        </div>
-        <span class="ctrl-div"></span>
-        <select class="ctrl-select" id="sel-audio" title="Audio Mode">
-            <option value="tone" selected>Tone</option>
-            <option value="amnoise">AM Noise</option>
-            <option value="both">Both</option>
+        <select class="ctrl-select" id="sel-preset" title="Geometric patterns intensify through alpha, then dissolve into dreamlike imagery as you cross into theta">
+            <option value="custom">Custom</option>
+            <option value="descent">Descent</option>
         </select>
+        <input type="file" id="audio-file" accept="audio/*" hidden>
+        <button class="btn-icon" id="btn-upload" title="Pick audio file — Descent syncs to track length (local only, nothing leaves your browser)">&#9835;</button>
+        <span class="audio-label" id="audio-label"></span>
         <div class="slider-group">
             <label>Vol</label>
             <input type="range" id="vol-audio" min="0" max="100" value="40">
         </div>
-        <div class="slider-group">
-            <label>Noise</label>
-            <input type="range" id="vol-noise" min="0" max="100" value="0">
-        </div>
         <span class="ctrl-div"></span>
-        <button class="btn-morph" id="btn-morph" title="Morph — slowly evolve all parameters (M)">Morph</button>
-        <select class="ctrl-select" id="sel-preset" title="Preset Journey">
-            <option value="custom">Custom</option>
-            <option value="gysin">Gysin Classic</option>
-            <option value="deep">Deep Drift</option>
-            <option value="lucid">Lucid Edge</option>
-            <option value="protocol">Protocol</option>
-        </select>
         <select class="ctrl-select" id="sel-timer" title="Session Timer">
             <option value="0">No Timer</option>
             <option value="300">5 min</option>
@@ -419,96 +357,31 @@ input[type="range"]::-moz-range-thumb {
 // ═══════════════════════════════════════════════
 //  SHADERS
 // ═══════════════════════════════════════════════
-const PREC = `
-#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-`;
-
-const COMMON = `
-#define PI  3.14159265359
-#define TAU 6.28318530718
-uniform float u_time;
-uniform vec2  u_resolution;
-uniform float u_flicker;
-uniform float u_frequency;
-
-float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float noise(vec2 p) {
-    vec2 i = floor(p), f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    return mix(mix(hash(i), hash(i+vec2(1,0)), f.x),
-               mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), f.x), f.y);
-}
-float fbm(vec2 p) {
-    float v = 0.0, a = 0.5;
-    mat2 r = mat2(0.8,0.6,-0.6,0.8);
-    for(int i=0;i<6;i++){v+=a*noise(p);p=r*p*2.0;a*=0.5;}
-    return v;
-}
-float grain(vec2 uv, float t) { return (hash(uv*500.0+fract(t*7.0))-0.5)*0.05; }
-`;
-
 const VERT = `attribute vec2 a_position;
 void main(){gl_Position=vec4(a_position,0.0,1.0);}`;
 
 const FRAG = {};
 
-// ── Ganzflicker — uniform field with optional spatial seed ───────
-// Research basis: Rule et al. 2011 showed subtle spatial "seeds" can
-// bias which cortical hallucination pattern stabilizes (spiral, radial, rings).
-// The seed is kept very faint (~5-8%) so the cortex does the real work.
-FRAG.ganzflicker = PREC + COMMON + `
-uniform float u_seed;  // continuous 0-3: off→radial→spiral→rings (blends between)
-uniform vec3  u_tint;  // color tint (default warm white)
+// ── Pure flat strobe — no grain, no vignette, no per-pixel work ──
+FRAG.ganzflicker = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+uniform float u_flicker;
+uniform vec3  u_tint;
 void main(){
-    vec2 uv=(gl_FragCoord.xy-0.5*u_resolution)/min(u_resolution.x,u_resolution.y);
-    float d=length(uv), a=atan(uv.y,uv.x);
-
-    // Tinted field
-    vec3 c=u_tint;
-
-    // Very gentle vignette (barely perceptible)
-    c*=smoothstep(2.0,0.5,d)*0.88+0.12;
-
-    // Spatial seeds — compute all, blend by continuous u_seed
-    float radial=sin(a*8.0+u_time*0.3)*0.5+0.5;
-    radial*=exp(-d*1.2)*0.07;
-
-    float spiral=sin(a*3.0+log(max(d,0.01))*4.0-u_time*0.5)*0.5+0.5;
-    spiral*=exp(-d*1.0)*0.06;
-
-    float rings=sin(d*12.0-u_time*0.4)*0.5+0.5;
-    rings*=exp(-d*0.8)*0.07;
-
-    // Crossfade: 0=off, 1=radial, 2=spiral, 3=rings
-    float s=u_seed;
-    float seed=0.0;
-    seed+=radial * clamp(1.0-abs(s-1.0), 0.0, 1.0);
-    seed+=spiral * clamp(1.0-abs(s-2.0), 0.0, 1.0);
-    seed+=rings  * clamp(1.0-abs(s-3.0), 0.0, 1.0);
-    c+=vec3(seed);
-
-    // Apply flicker
-    c*=u_flicker;
-
-    // Light organic grain
-    c+=grain(uv,u_time)*0.6;
-
-    gl_FragColor=vec4(max(c,0.0),1.0);
+    gl_FragColor=vec4(u_tint*u_flicker,1.0);
 }`;
 
 // ═══════════════════════════════════════════════
 //  AUDIO ENGINE
 // ═══════════════════════════════════════════════
 // Research basis:
-//   - Isochronal tones: strongest auditory entrainment (Ioannou et al. 2024)
+//   - Isochronic tones: strongest auditory entrainment (Ioannou et al. 2024)
 //   - 220 Hz carrier: low carriers produce 3x stronger ASSR (Ross et al. 2003)
 //   - Square envelope: up to 50% more effective (Ferraro et al. 2025)
-//   - AM noise: amplitude-modulated pink noise as alternative entrainment vehicle
-//   - Pink noise background: can mask beat percept (Ingendoh 2023), default off
 class AudioEngine {
     constructor() {
         this.ctx = null;
@@ -516,8 +389,10 @@ class AudioEngine {
         this.carrierFreq = 220;
         this.beatFreq = 10;
         this.volume = 0.4;
-        this.noiseVolume = 0;
-        this.mode = 'tone'; // 'tone', 'amnoise', 'both'
+        this.userAudioBuffer = null;
+        this.userAudioNode = null;
+        this.userAudioGain = null;
+        this.fadeInDuration = 60; // seconds
     }
 
     init() {
@@ -528,13 +403,73 @@ class AudioEngine {
         this.master.gain.value = 0;
         this.master.connect(this.ctx.destination);
 
-        this._createPinkNoiseBuffer();
+        // Tone envelope — used for fade-in control
+        this.toneEnvelope = this.ctx.createGain();
+        this.toneEnvelope.gain.value = 1;
+        this.toneEnvelope.connect(this.master);
+
+        // User audio output — bypasses tone envelope, 15% louder than tone
+        this.userAudioGain = this.ctx.createGain();
+        this.userAudioGain.gain.value = this.volume * 1.15;
+        this.userAudioGain.connect(this.master);
+
         this._createIsochronal();
-        this._createAMNoise();
-        this._createBgNoise();
     }
 
-    // ── Isochronal tone — 220 Hz carrier, always square AM ──
+    async loadAudioFile(file) {
+        this.init();
+        const arrayBuf = await file.arrayBuffer();
+        this.userAudioBuffer = await this.ctx.decodeAudioData(arrayBuf);
+        this._normalizeBuffer(this.userAudioBuffer);
+        return this.userAudioBuffer.duration;
+    }
+
+    // Peak-normalize the buffer so the loudest sample hits 1.0
+    _normalizeBuffer(buffer) {
+        let peak = 0;
+        for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+            const data = buffer.getChannelData(ch);
+            for (let i = 0; i < data.length; i++) {
+                const abs = Math.abs(data[i]);
+                if (abs > peak) peak = abs;
+            }
+        }
+        if (peak === 0 || peak >= 0.99) return; // already normalized or silent
+        const scale = 1.0 / peak;
+        for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+            const data = buffer.getChannelData(ch);
+            for (let i = 0; i < data.length; i++) {
+                data[i] *= scale;
+            }
+        }
+    }
+
+    getUserAudioDuration() {
+        return this.userAudioBuffer ? this.userAudioBuffer.duration : 0;
+    }
+
+    // ── Smoothed LFO — lowpass rounds square edges to prevent clicks ──
+    _createSmoothedLfo(freq, type) {
+        const ctx = this.ctx;
+        const lfo = ctx.createOscillator();
+        lfo.type = type || 'square';
+        lfo.frequency.value = freq;
+
+        const smoother = ctx.createBiquadFilter();
+        smoother.type = 'lowpass';
+        smoother.frequency.value = 400;
+        smoother.Q.value = 0.5;
+
+        const scale = ctx.createGain();
+        scale.gain.value = 0.5;
+
+        lfo.connect(smoother);
+        smoother.connect(scale);
+        lfo.start();
+        return { lfo, smoother, scale };
+    }
+
+    // ── Isochronal tone — 220 Hz carrier, waveform-synced AM ──
     _createIsochronal() {
         const ctx = this.ctx;
 
@@ -542,148 +477,95 @@ class AudioEngine {
         this.carrier.type = 'sine';
         this.carrier.frequency.value = this.carrierFreq;
 
-        // Square AM envelope: full 0→1 modulation for maximum entrainment
         this.toneAmp = ctx.createGain();
         this.toneAmp.gain.value = 0.5;
 
-        this.toneLfo = ctx.createOscillator();
-        this.toneLfo.type = 'square';
-        this.toneLfo.frequency.value = this.beatFreq;
-
-        this.toneLfoScale = ctx.createGain();
-        this.toneLfoScale.gain.value = 0.5;
-        this.toneLfo.connect(this.toneLfoScale);
-        this.toneLfoScale.connect(this.toneAmp.gain);
+        const toneLfoChain = this._createSmoothedLfo(this.beatFreq, 'square');
+        this.toneLfo = toneLfoChain.lfo;
+        this.toneLfoScale = toneLfoChain.scale;
+        toneLfoChain.scale.connect(this.toneAmp.gain);
 
         this.toneGain = ctx.createGain();
         this.toneGain.gain.value = this.volume;
 
         this.carrier.connect(this.toneAmp);
         this.toneAmp.connect(this.toneGain);
-        this.toneGain.connect(this.master);
+        this.toneGain.connect(this.toneEnvelope);
 
         this.carrier.start();
-        this.toneLfo.start();
     }
 
-    // ── AM Noise — pink noise amplitude-modulated at target frequency ──
-    _createAMNoise() {
-        const ctx = this.ctx;
-
-        this.amNoiseAmp = ctx.createGain();
-        this.amNoiseAmp.gain.value = 0.5;
-
-        this.amNoiseLfo = ctx.createOscillator();
-        this.amNoiseLfo.type = 'square';
-        this.amNoiseLfo.frequency.value = this.beatFreq;
-
-        this.amNoiseLfoScale = ctx.createGain();
-        this.amNoiseLfoScale.gain.value = 0.5;
-        this.amNoiseLfo.connect(this.amNoiseLfoScale);
-        this.amNoiseLfoScale.connect(this.amNoiseAmp.gain);
-
-        this.amNoiseGain = ctx.createGain();
-        this.amNoiseGain.gain.value = 0; // off by default (mode = 'tone')
-
-        // amNoiseNode connected in start()
-        this.amNoiseAmp.connect(this.amNoiseGain);
-        this.amNoiseGain.connect(this.master);
-
-        this.amNoiseLfo.start();
-    }
-
-    // ── Background pink noise (unmodulated, comfort layer) ──
-    _createBgNoise() {
-        this.bgNoiseGain = this.ctx.createGain();
-        this.bgNoiseGain.gain.value = this.noiseVolume;
-        this.bgNoiseGain.connect(this.master);
-    }
-
-    // ── Pink noise buffer (shared) ──────
-    _createPinkNoiseBuffer() {
-        const ctx = this.ctx;
-        const len = ctx.sampleRate * 2;
-        const buf = ctx.createBuffer(2, len, ctx.sampleRate);
-        for (let ch = 0; ch < 2; ch++) {
-            const data = buf.getChannelData(ch);
-            let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
-            for (let i = 0; i < len; i++) {
-                const w = Math.random() * 2 - 1;
-                b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
-                b2=0.96900*b2+w*0.1538520; b3=0.86650*b3+w*0.3104856;
-                b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
-                data[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11;
-                b6=w*0.115926;
-            }
-        }
-        this.noiseBuf = buf;
-    }
-
-    _startNoiseNode(dest) {
-        const node = this.ctx.createBufferSource();
-        node.buffer = this.noiseBuf;
-        node.loop = true;
-        node.connect(dest);
-        node.start();
-        return node;
-    }
-
-    start() {
+    async start(fadeIn) {
         this.init();
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-        // Start noise sources
-        if (this.bgNoiseNode) { try { this.bgNoiseNode.stop(); } catch(e){} }
-        if (this.amNoiseNode) { try { this.amNoiseNode.stop(); } catch(e){} }
-        this.bgNoiseNode = this._startNoiseNode(this.bgNoiseGain);
-        this.amNoiseNode = this._startNoiseNode(this.amNoiseAmp);
-        this._applyMode();
-        this.master.gain.setTargetAtTime(1, this.ctx.currentTime, 0.3);
+        if (this.ctx.state === 'suspended') await this.ctx.resume();
+        const t = this.ctx.currentTime;
+
+        // Master on immediately
+        this.master.gain.cancelScheduledValues(t);
+        this.master.gain.setValueAtTime(1, t);
+
+        if (fadeIn && this.userAudioBuffer) {
+            // Tone fades in over 60s
+            this.toneEnvelope.gain.cancelScheduledValues(t);
+            this.toneEnvelope.gain.setValueAtTime(0, t);
+            this.toneEnvelope.gain.linearRampToValueAtTime(1, t + this.fadeInDuration);
+
+            // User audio plays immediately at full volume
+            this._startUserAudio();
+        } else {
+            this.toneEnvelope.gain.cancelScheduledValues(t);
+            this.toneEnvelope.gain.setValueAtTime(1, t);
+        }
+
         this.started = true;
     }
 
     stop() {
         if (!this.ctx) return;
-        this.master.gain.setTargetAtTime(0, this.ctx.currentTime, 0.3);
+        const t = this.ctx.currentTime;
+        this.master.gain.cancelScheduledValues(t);
+        this.master.gain.setTargetAtTime(0, t, 0.3);
+        this.toneEnvelope.gain.cancelScheduledValues(t);
+        this._stopUserAudio();
         this.started = false;
+    }
+
+    _startUserAudio() {
+        this._stopUserAudio();
+        if (!this.userAudioBuffer) return;
+        this.userAudioNode = this.ctx.createBufferSource();
+        this.userAudioNode.buffer = this.userAudioBuffer;
+        this.userAudioNode.connect(this.userAudioGain);
+        this.userAudioNode.start();
+    }
+
+    _stopUserAudio() {
+        if (this.userAudioNode) {
+            try { this.userAudioNode.stop(); } catch(e) {}
+            this.userAudioNode = null;
+        }
     }
 
     setFrequency(hz) {
         this.beatFreq = hz;
         if (!this.ctx) return;
-        const t = this.ctx.currentTime;
-        this.toneLfo.frequency.setTargetAtTime(hz, t, 0.05);
-        this.amNoiseLfo.frequency.setTargetAtTime(hz, t, 0.05);
+        this.toneLfo.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.05);
     }
 
-    setMode(mode) {
-        this.mode = mode;
-        if (this.ctx) this._applyMode();
-    }
-
-    _applyMode() {
-        const t = this.ctx.currentTime;
-        const v = this.volume;
-        // Crossfade between tone and AM noise based on mode
-        if (this.mode === 'tone') {
-            this.toneGain.gain.setTargetAtTime(v, t, 0.1);
-            this.amNoiseGain.gain.setTargetAtTime(0, t, 0.1);
-        } else if (this.mode === 'amnoise') {
-            this.toneGain.gain.setTargetAtTime(0, t, 0.1);
-            this.amNoiseGain.gain.setTargetAtTime(v, t, 0.1);
-        } else { // both
-            this.toneGain.gain.setTargetAtTime(v * 0.6, t, 0.1);
-            this.amNoiseGain.gain.setTargetAtTime(v * 0.5, t, 0.1);
-        }
+    setWaveform(type) {
+        if (!this.ctx) return;
+        const t = (type === 'square') ? 'square'
+                : (type === 'triangle') ? 'triangle'
+                : 'sine';
+        this.toneLfo.type = t;
     }
 
     setVolume(v) {
         this.volume = v;
-        if (this.ctx) this._applyMode();
-    }
-
-    setNoiseVolume(v) {
-        this.noiseVolume = v;
-        if (this.bgNoiseGain) this.bgNoiseGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.05);
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+        this.toneGain.gain.setTargetAtTime(v, t, 0.1);
+        this.userAudioGain.gain.setTargetAtTime(v * 1.15, t, 0.1);
     }
 }
 
@@ -696,9 +578,7 @@ class VisualEngine {
         this.gl = canvas.getContext('webgl', { antialias: false, alpha: false });
         if (!this.gl) { alert('WebGL is required.'); return; }
         this.program = null;
-        this.seedValue = 0;
         this.tint = [1.0, 0.93, 0.82];
-        this.startTime = performance.now() / 1000;
         this._initGeometry();
         this._compile();
     }
@@ -727,18 +607,11 @@ class VisualEngine {
         }
         this.program = {
             program: prog,
-            a_position:   gl.getAttribLocation(prog, 'a_position'),
-            u_time:       gl.getUniformLocation(prog, 'u_time'),
-            u_resolution: gl.getUniformLocation(prog, 'u_resolution'),
-            u_flicker:    gl.getUniformLocation(prog, 'u_flicker'),
-            u_frequency:  gl.getUniformLocation(prog, 'u_frequency'),
-            u_seed:       gl.getUniformLocation(prog, 'u_seed'),
-            u_tint:       gl.getUniformLocation(prog, 'u_tint'),
+            a_position: gl.getAttribLocation(prog, 'a_position'),
+            u_flicker:  gl.getUniformLocation(prog, 'u_flicker'),
+            u_tint:     gl.getUniformLocation(prog, 'u_tint'),
         };
     }
-
-    setSeed(v) { this.seedValue = v; }
-    setTint(r, g, b) { this.tint = [r, g, b]; }
 
     resize() {
         const dpr = window.devicePixelRatio || 1;
@@ -747,7 +620,7 @@ class VisualEngine {
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    render(flicker, frequency) {
+    render(flicker) {
         if (!this.gl) return;
         const gl = this.gl, p = this.program;
         if (!p) return;
@@ -755,12 +628,7 @@ class VisualEngine {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuf);
         gl.enableVertexAttribArray(p.a_position);
         gl.vertexAttribPointer(p.a_position, 2, gl.FLOAT, false, 0, 0);
-        const t = performance.now() / 1000 - this.startTime;
-        gl.uniform1f(p.u_time, t);
-        gl.uniform2f(p.u_resolution, this.canvas.width, this.canvas.height);
         gl.uniform1f(p.u_flicker, flicker);
-        gl.uniform1f(p.u_frequency, frequency);
-        gl.uniform1f(p.u_seed, this.seedValue);
         gl.uniform3f(p.u_tint, this.tint[0], this.tint[1], this.tint[2]);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -770,19 +638,18 @@ class VisualEngine {
 //  DREAMACHINE — Main Controller
 // ═══════════════════════════════════════════════
 const TAU = Math.PI * 2;
+const FREQ_MIN = 4;
+const FREQ_MAX = 15;
+const DUTY_CYCLE = 0.3; // locked — optimal per Amaya et al. 2023
 
 const BANDS = [
-    { max: 4,  name: 'DELTA', sym: "\u03B4" },
     { max: 8,  name: 'THETA', sym: "\u03B8" },
     { max: 13, name: 'ALPHA', sym: "\u03B1" },
-    { max: 30, name: 'BETA',  sym: "\u03B2" },
+    { max: 15, name: 'BETA',  sym: "\u03B2" },
 ];
 
 const PRESETS = {
-    gysin:    { startFreq:10,  endFreq:10,  duration:900,  seed:0, waveform:'square',   dutyCycle:0.3, audio:'tone' },
-    deep:     { startFreq:12,  endFreq:4,   duration:1200, seed:2, waveform:'sine',     dutyCycle:0.5, audio:'amnoise' },
-    lucid:    { startFreq:7.5, endFreq:7.5, duration:900,  seed:3, waveform:'sine',     dutyCycle:0.5, audio:'both' },
-    protocol: { startFreq:10,  endFreq:10,  duration:600,  seed:0, waveform:'square',   dutyCycle:0.3, audio:'tone' },
+    descent: { startFreq: 12, endFreq: 4, duration: 1200, waveform: 'square' },
 };
 
 class DreamMachine {
@@ -791,21 +658,20 @@ class DreamMachine {
         this.visual = new VisualEngine(document.getElementById('canvas'));
         this.running = false;
         this.frequency = 10;
-        this.depth = 1.0;
-        this.waveform = 'sine';
-        this.dutyCycle = 0.3;
+        this.waveform = 'square';
 
         this.timerDuration = 0;
         this.timerElapsed = 0;
-        this.lastTick = 0;
+        this.lastTick = performance.now() / 1000;
 
         this.journey = null;
         this.journeyStart = 0;
-        this.morphing = false;
-        this.morphTime = 0;
-        this._lastMorphAudio = 'tone';
+        this.visualPhase = 0;
         this.wakeLock = null;
         this.hideTimeout = null;
+        this.fadeIn = false;
+        this.fadeInStart = 0;
+        this.hasUserAudio = false;
 
         this._setupWarning();
         this._setupControls();
@@ -814,7 +680,6 @@ class DreamMachine {
         this._setupInfo();
         this.visual.resize();
         window.addEventListener('resize', () => this.visual.resize());
-        // Re-acquire wake lock when returning to tab
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && this.running) this._requestWakeLock();
         });
@@ -853,47 +718,38 @@ class DreamMachine {
             this.frequency = parseFloat($('freq').value);
             this._updateFreqUI();
             this.audio.setFrequency(this.frequency);
-            this._disableMorph();
             $('sel-preset').value = 'custom';
             this.journey = null;
         };
 
-        // Spatial seed
-        $('sel-seed').onchange = e => {
-            this.visual.setSeed(parseFloat(e.target.value));
-            this._disableMorph();
-        };
-
-        // Waveform (visual flicker shape only — audio always uses square for max entrainment)
+        // Waveform (synced: visual flicker + audio AM envelope)
         $('sel-wave').onchange = e => {
             this.waveform = e.target.value;
-            this._updateDutyVisibility();
-            this._disableMorph();
+            this.audio.setWaveform(this.waveform);
             $('sel-preset').value = 'custom';
             this.journey = null;
         };
 
-        // Audio mode
-        $('sel-audio').onchange = e => {
-            this.audio.setMode(e.target.value);
-            this._disableMorph();
-        };
-
-        // Duty cycle
-        $('duty').oninput = () => {
-            this.dutyCycle = parseInt($('duty').value, 10) / 100;
-            $('duty-val').textContent = $('duty').value + '%';
-        };
-
-        // Depth
-        $('depth').oninput = e => this.depth = e.target.value / 100;
-
-        // Volumes
+        // Volume
         $('vol-audio').oninput = e => this.audio.setVolume(e.target.value / 100);
-        $('vol-noise').oninput = e => this.audio.setNoiseVolume(e.target.value / 100);
 
-        // Morph
-        $('btn-morph').onclick = () => this._toggleMorph();
+        // Audio file upload
+        $('btn-upload').onclick = () => $('audio-file').click();
+        $('audio-file').onchange = async e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                await this.audio.loadAudioFile(file);
+                this.hasUserAudio = true;
+                const label = $('audio-label');
+                label.textContent = file.name;
+                label.classList.add('has-file');
+                // If Descent is already selected, restart with the new audio
+                if ($('sel-preset').value === 'descent') this._applyPreset('descent');
+            } catch (err) {
+                console.error('Failed to decode audio file:', err);
+            }
+        };
 
         // Preset
         $('sel-preset').onchange = e => this._applyPreset(e.target.value);
@@ -915,40 +771,37 @@ class DreamMachine {
         document.getElementById('freq').value = this.frequency;
     }
 
-    _updateDutyVisibility() {
-        document.getElementById('duty-group').classList.toggle('hidden', this.waveform !== 'square');
-    }
-
     _applyPreset(key) {
-        if (key === 'custom' || !PRESETS[key]) { this.journey = null; return; }
+        if (key === 'custom' || !PRESETS[key]) { this.journey = null; this.fadeIn = false; return; }
         const p = PRESETS[key];
         const $ = id => document.getElementById(id);
 
-        this.journey = p;
+        // If user audio is loaded, sync descent duration to track length
+        const audioDur = this.audio.getUserAudioDuration();
+        const duration = (this.hasUserAudio && audioDur > 0) ? audioDur : p.duration;
+
+        this.journey = { ...p, duration };
         this.journeyStart = performance.now() / 1000;
         this.frequency = p.startFreq;
         this._updateFreqUI();
         this.audio.setFrequency(this.frequency);
 
-        this.visual.setSeed(p.seed);
-        $('sel-seed').value = String(p.seed);
-
         this.waveform = p.waveform;
         $('sel-wave').value = p.waveform;
-        this._updateDutyVisibility();
+        this.audio.setWaveform(p.waveform);
 
-        this.audio.setMode(p.audio);
-        $('sel-audio').value = p.audio;
-
-        this.dutyCycle = p.dutyCycle;
-        $('duty').value = Math.round(p.dutyCycle * 100);
-        $('duty-val').textContent = Math.round(p.dutyCycle * 100) + '%';
-
-        this.timerDuration = p.duration;
+        this.timerDuration = duration;
         this.timerElapsed = 0;
-        $('sel-timer').value = String(p.duration);
+        // Match dropdown if a standard value, otherwise just show countdown
+        const match = [...$('sel-timer').options].find(o => parseInt(o.value, 10) === Math.round(duration));
+        $('sel-timer').value = match ? match.value : '0';
+
+        // Enable fade-in when user audio is present
+        this.fadeIn = this.hasUserAudio;
+        this.fadeInStart = performance.now() / 1000;
 
         if (!this.running) this.toggle();
+        else if (this.fadeIn) this.audio.start(true); // restart with fade-in
     }
 
     // ── Keyboard ───────────────────────
@@ -956,7 +809,6 @@ class DreamMachine {
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
 
-            // Close info panel on Escape
             if (e.key === 'Escape') {
                 document.getElementById('info-overlay').classList.remove('visible');
                 return;
@@ -967,14 +819,13 @@ class DreamMachine {
                     e.preventDefault(); this.toggle(); break;
                 case 'ArrowUp': case 'ArrowRight':
                     e.preventDefault();
-                    this.frequency = Math.min(25, this.frequency + 0.5);
+                    this.frequency = Math.min(FREQ_MAX, this.frequency + 0.5);
                     this._updateFreqUI(); this.audio.setFrequency(this.frequency); break;
                 case 'ArrowDown': case 'ArrowLeft':
                     e.preventDefault();
-                    this.frequency = Math.max(1, this.frequency - 0.5);
+                    this.frequency = Math.max(FREQ_MIN, this.frequency - 0.5);
                     this._updateFreqUI(); this.audio.setFrequency(this.frequency); break;
                 case 'f': case 'F': this._toggleFS(); break;
-                case 'm': case 'M': this._toggleMorph(); break;
                 case '?': document.getElementById('info-overlay').classList.add('visible'); break;
             }
         });
@@ -1013,110 +864,7 @@ class DreamMachine {
         else document.exitFullscreen();
     }
 
-    // ── Morph ──────────────────────────
-    _disableMorph() {
-        if (!this.morphing) return;
-        this.morphing = false;
-        document.getElementById('btn-morph').classList.remove('active');
-        this.visual.setTint(1.0, 0.93, 0.82); // reset to default warm white
-    }
-
-    _toggleMorph() {
-        this.morphing = !this.morphing;
-        document.getElementById('btn-morph').classList.toggle('active', this.morphing);
-        if (this.morphing) {
-            this.morphTime = performance.now() / 1000;
-            this.journey = null;
-            document.getElementById('sel-preset').value = 'custom';
-        } else {
-            this.visual.setTint(1.0, 0.93, 0.82);
-        }
-    }
-
-    _morph(now) {
-        // Elapsed since morph started — all oscillators run off this
-        const t = now - this.morphTime;
-
-        // ── Frequency: layered slow drift 2-20 Hz ──
-        // Primary wave ~2.5min, secondary ~50s, tertiary ~18s, micro ~7s
-        const f = 11
-            + Math.sin(t * 0.042) * 6.0                       // ~2.5 min sweep
-            + Math.sin(t * 0.126 + 1.7) * 2.5                 // ~50s cycle
-            + Math.sin(t * 0.35 + 3.1) * 1.2                  // ~18s wobble
-            + Math.sin(t * 0.9 + 0.3) * 0.3;                  // ~7s micro-drift
-        this.frequency = Math.max(2, Math.min(22, f));
-        this._updateFreqUI();
-        this.audio.setFrequency(this.frequency);
-
-        // ── Seed: continuous drift 0→3, ~4 min full cycle with sub-wobble ──
-        const seedRaw = Math.max(0, Math.min(3,
-            1.5 + Math.sin(t * 0.026) * 1.5                   // slow sweep
-            + Math.sin(t * 0.071 + 2.0) * 0.4                 // wobble
-        ));
-        this.visual.setSeed(seedRaw);
-        document.getElementById('sel-seed').value = String(Math.round(seedRaw));
-
-        // ── Color: full spectrum hue rotation ──
-        // HSL-style rotation mapped to RGB — covers warm AND cool hues
-        // Primary hue cycle ~5 min, saturation breathes ~2 min, lightness ~80s
-        const hue = (t * 0.0033) % 1;                         // ~5 min full rotation
-        const sat = 0.25 + 0.2 * Math.sin(t * 0.052 + 1.0);  // 0.05–0.45 saturation
-        const lit = 0.85 + 0.1 * Math.sin(t * 0.078 + 2.5);  // 0.75–0.95 lightness
-
-        // HSL → RGB
-        const hueToRgb = (p, q, t) => {
-            if (t < 0) t += 1; if (t > 1) t -= 1;
-            if (t < 1/6) return p + (q - p) * 6 * t;
-            if (t < 1/2) return q;
-            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-            return p;
-        };
-        const q = lit < 0.5 ? lit * (1 + sat) : lit + sat - lit * sat;
-        const p = 2 * lit - q;
-        this.visual.setTint(
-            hueToRgb(p, q, hue + 1/3),
-            hueToRgb(p, q, hue),
-            hueToRgb(p, q, hue - 1/3)
-        );
-
-        // ── Visual waveform: cycle every ~2 min ──
-        const wavePhase = ((t * 0.0083) % 1);
-        const wforms = ['sine', 'triangle', 'square'];
-        const wi = Math.floor(wavePhase * 3) % 3;
-        const newWave = wforms[wi];
-        if (newWave !== this.waveform) {
-            this.waveform = newWave;
-            document.getElementById('sel-wave').value = this.waveform;
-            this._updateDutyVisibility();
-        }
-
-        // ── Audio mode: cycle every ~3 min ──
-        const audioPhase = ((t * 0.0056) % 1);
-        const amodes = ['tone', 'amnoise', 'both'];
-        const ai = Math.floor(audioPhase * 3) % 3;
-        const newAudio = amodes[ai];
-        if (newAudio !== this._lastMorphAudio) {
-            this._lastMorphAudio = newAudio;
-            this.audio.setMode(newAudio);
-            document.getElementById('sel-audio').value = newAudio;
-        }
-
-        // ── Duty cycle: drift 15-55% when on square ──
-        if (this.waveform === 'square') {
-            const duty = 0.35 + 0.2 * Math.sin(t * 0.065);
-            this.dutyCycle = duty;
-            const pct = Math.round(duty * 100);
-            document.getElementById('duty').value = pct;
-            document.getElementById('duty-val').textContent = pct + '%';
-        }
-
-        // ── Depth: subtle breathing 70-100% ──
-        const depth = 0.85 + 0.15 * Math.sin(t * 0.044 + 1.8);
-        this.depth = depth;
-        document.getElementById('depth').value = Math.round(depth * 100);
-    }
-
-    // ── Wake Lock (keep screen on for mobile) ──
+    // ── Wake Lock ──────────────────────
     async _requestWakeLock() {
         try {
             if ('wakeLock' in navigator) {
@@ -1137,13 +885,15 @@ class DreamMachine {
         if (this.running) {
             btn.innerHTML = '&#10074;&#10074;';
             btn.classList.add('active');
-            this.audio.start();
+            this.audio.start(this.fadeIn);
+            if (this.fadeIn) this.fadeInStart = performance.now() / 1000;
             this.lastTick = performance.now() / 1000;
             this._requestWakeLock();
         } else {
             btn.innerHTML = '&#9654;';
             btn.classList.remove('active');
             this.audio.stop();
+            this.fadeIn = false;
             this._releaseWakeLock();
             document.getElementById('controls').classList.remove('fade-out');
             document.getElementById('hint').classList.remove('visible');
@@ -1154,23 +904,24 @@ class DreamMachine {
     // ── Render loop ────────────────────
     _loop() {
         const now = performance.now() / 1000;
+        const dt = now - this.lastTick;
+        this.lastTick = now;
 
         if (this.running) {
-            const dt = now - this.lastTick;
-            this.lastTick = now;
 
-            // Morph mode — overrides journey
-            if (this.morphing) {
-                this._morph(now);
-            }
-
-            // Journey interpolation (disabled during morph)
-            else if (this.journey) {
+            // Journey — discrete 0.5 Hz steps (brain needs steady frequency to entrain)
+            if (this.journey) {
                 const elapsed = now - this.journeyStart;
                 const t = Math.min(elapsed / this.journey.duration, 1);
-                this.frequency = this.journey.startFreq + (this.journey.endFreq - this.journey.startFreq) * t;
-                this._updateFreqUI();
-                this.audio.setFrequency(this.frequency);
+                const range = this.journey.endFreq - this.journey.startFreq;
+                const steps = Math.round(Math.abs(range) / 0.5);
+                const stepT = Math.floor(t * steps) / steps;
+                const newFreq = this.journey.startFreq + range * stepT;
+                if (newFreq !== this.frequency) {
+                    this.frequency = newFreq;
+                    this._updateFreqUI();
+                    this.audio.setFrequency(this.frequency);
+                }
                 if (t >= 1) {
                     this.journey = null;
                     document.getElementById('sel-preset').value = 'custom';
@@ -1194,22 +945,28 @@ class DreamMachine {
         }
 
         // ── Flicker calculation ────────
+        if (this.running) this.visualPhase = (this.visualPhase + this.frequency * dt) % 1;
+        const phase = this.visualPhase;
         let raw;
-        const phase = (now * this.frequency) % 1;
 
         if (this.waveform === 'square') {
-            raw = phase < this.dutyCycle ? 1.0 : 0.0;
+            raw = phase < DUTY_CYCLE ? 1.0 : 0.0;
         } else if (this.waveform === 'triangle') {
             raw = 1.0 - Math.abs(2.0 * phase - 1.0);
         } else {
-            raw = 0.5 + 0.5 * Math.sin(TAU * this.frequency * now);
+            raw = 0.5 + 0.5 * Math.sin(TAU * phase);
         }
 
-        const flicker = this.running
-            ? (1.0 - this.depth) + this.depth * raw
-            : 0.05;
+        // Apply 60s visual fade-in when user audio is driving descent
+        let intensity = 1;
+        if (this.fadeIn && this.running) {
+            const fadeElapsed = now - this.fadeInStart;
+            intensity = Math.min(1, fadeElapsed / 60);
+        }
 
-        this.visual.render(flicker, this.frequency);
+        const flicker = this.running ? raw * intensity : 0.05;
+
+        this.visual.render(flicker);
         requestAnimationFrame(() => this._loop());
     }
 }
