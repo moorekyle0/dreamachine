@@ -30,8 +30,8 @@ html, body {
 }
 body.show-cursor { cursor: default; }
 
-/* ── Canvas ─────────────────────────── */
-#canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+/* ── Stage (full-field flicker) ─────── */
+#stage { position: fixed; inset: 0; background: #000; }
 
 /* ── Warning Modal ──────────────────── */
 .modal-overlay {
@@ -170,6 +170,36 @@ body.show-cursor { cursor: default; }
 .ctrl-select:focus { border-color: var(--amber-dim); }
 .ctrl-select option { background: #111; }
 
+/* Notice toast */
+#notice {
+    position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+    max-width: 80%; text-align: center;
+    background: rgba(14, 10, 0, 0.92);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font-size: 11px; line-height: 1.5;
+    padding: 8px 14px; z-index: 200;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+#notice.visible { opacity: 1; }
+
+/* Toggle pills (Light / Link) */
+.btn-toggle {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-dim); border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius); padding: 5px 10px;
+    font-family: inherit; font-size: 10px; cursor: pointer;
+    letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-toggle:hover { border-color: var(--border); color: var(--text); }
+.btn-toggle.active {
+    color: #0a0a0a; background: var(--amber);
+    border-color: var(--amber); font-weight: 600;
+}
+
+/* Hidden utility */
+.hidden { display: none !important; }
+
 /* Icon buttons */
 .btn-icon {
     background: none; border: 1px solid rgba(255, 255, 255, 0.08);
@@ -268,68 +298,96 @@ input[type="range"]::-moz-range-thumb {
     <div class="info-content">
 
         <h2>How It Works</h2>
-        <p>The Dream Machine uses flickering light to synchronize your brainwaves through <strong>photic driving</strong> — your visual cortex locks onto the flicker frequency and generates geometric patterns, colors, and flowing imagery behind closed eyelids. <em>(Greenwood &amp; Skipper 2024 — flicker produces hallucinations ~3x faster than static Ganzfeld.)</em></p>
-        <p>Audio pulses complement the visual flicker for stronger combined entrainment. <em>(Tsai lab / MIT GENUS — multimodal stimulation outperforms unimodal.)</em></p>
+        <p>Flickering light drives your visual cortex — an effect called <strong>photic driving</strong>: the cortex tends to lock onto the flicker rate, and many people see geometric patterns, colour, and drifting imagery behind closed eyelids. A matched pulsing tone adds an auditory channel. Responses vary a lot from person to person.</p>
+        <p>For best results: dark room, eyes closed, face toward the screen.</p>
 
-        <h2>Frequency</h2>
-        <p>Flicker rate in cycles per second, constrained to the effective range for photic driving:</p>
+        <h2>Frequency &amp; Bands</h2>
+        <p>The flicker rate in cycles per second (Hz). Manual is a free sandbox from 1 Hz up to half your display's refresh rate — the fastest a screen can flicker without aliasing (≈30 Hz on a 60 Hz display, ≈72 Hz on a 144 Hz one). The readout names the EEG band:</p>
         <ul>
-            <li><strong>Theta (4–8 Hz)</strong> — Meditation, hypnagogia, creativity. Works via sub-harmonic coupling to alpha.</li>
-            <li><strong>Alpha (8–13 Hz)</strong> — Relaxed awareness. <em>The sweet spot. Strongest, most reliable entrainment. 10 Hz is the classic target and peak for geometric visuals. (Frontiers 2016, Rule et al. 2011)</em></li>
-            <li><strong>Low Beta (13–15 Hz)</strong> — Alert focus, finer patterns. Diminishing returns above alpha.</li>
+            <li><strong>Delta (1–4 Hz)</strong> — very slow; deep-sleep range.</li>
+            <li><strong>Theta (4–8 Hz)</strong> — drowsy, meditative, hypnagogic.</li>
+            <li><strong>Alpha (8–13 Hz)</strong> — relaxed but awake. ~10 Hz is the classic target and the most reliable for geometric imagery.</li>
+            <li><strong>Beta (13–30 Hz)</strong> — alert, finer detail. Note: ~15–25 Hz is the peak seizure-risk band (see Safety).</li>
+            <li><strong>Gamma (30 Hz+)</strong> — fast; the 40 Hz preset lives here.</li>
         </ul>
-        <p>The range is capped at 15 Hz. Below 4 Hz, photic driving is ineffective (~3% response). Above 15 Hz, entrainment weakens and seizure risk peaks at 16 Hz (~90% of photosensitive individuals). <em>(IPS meta-analysis; international photosensitivity guidelines.)</em></p>
 
-        <h2>Waveform</h2>
+        <h2>Waveform (visual)</h2>
         <ul>
-            <li><strong>Sine</strong> — Smooth, gentle transitions. Easiest on the eyes. Good for first sessions.</li>
-            <li><strong>Triangle</strong> — Linear ramp up/down. Middle ground.</li>
-            <li><strong>Square</strong> — Sharp on/off flashes. <em>~35% stronger cortical response than sine (Zhu et al. 2010). 30% duty cycle locked — optimal for hallucination induction (Amaya et al. 2023).</em></li>
+            <li><strong>Sine</strong> — smooth fade in and out. Gentlest on the eyes; the default.</li>
+            <li><strong>Triangle</strong> — linear ramp up/down. Closest to the original slotted Dreamachine.</li>
+            <li><strong>Square</strong> — hard on/off flashes. Sharpest transients and strongest drive, but the harshest.</li>
         </ul>
 
         <h2>Audio</h2>
-        <p>A 220 Hz isochronic tone amplitude-modulated at the flicker frequency — the strongest single-method auditory entrainment. <em>(Ioannou et al. 2024; low carriers produce ~3x stronger ASSR — Ross et al. 2003; square AM envelope ~50% more effective — Ferraro et al. 2025.)</em></p>
-        <p>The audio envelope is synced to the visual waveform for maximum multisensory coherence.</p>
+        <p>A 220 Hz tone driven at the flicker rate. Pick the method:</p>
+        <ul>
+            <li><strong>Isochronic</strong> — a single tone pulsed on/off. Strongest entrainment and the default; works on any speakers.</li>
+            <li><strong>Monaural</strong> — two close tones beating together. Works on speakers.</li>
+            <li><strong>Binaural &#127911;</strong> — a different tone in each ear; the beat forms in your head. <strong>Requires headphones</strong> — it does nothing on speakers.</li>
+            <li><strong>Off</strong> — visual only (plus any music you load).</li>
+        </ul>
+        <p><strong>Link</strong> ties the audio rate to the visual flicker (the natural pairing). Switch it off to give the audio its own frequency slider — handy for playing one rate against another.</p>
 
-        <h2>Descent</h2>
-        <p>The built-in journey: square wave stepping from 12→4 Hz in 0.5 Hz increments. Each step holds steady for the brain to entrain before dropping. Starts in upper alpha, passes through the 10 Hz sweet spot, then descends through theta to the edge of delta. Default 20 minutes.</p>
-        <p>Upload an audio file (&#9835;) to score the descent — the sweep syncs to your track's length. The first 60 seconds fade in: your music plays immediately while the strobe and tone gently emerge from black/silence, so the soundtrack leads.</p>
+        <h2>Modes</h2>
+        <ul>
+            <li><strong>Manual</strong> — the sandbox: set the frequency freely with the slider. Use <strong>Light</strong> to switch the strobe off for an audio-only session, and <strong>Link</strong> to decouple the audio from the visual.</li>
+            <li><strong>Descent</strong> — a guided journey stepping 12→4 Hz over the session: from alert alpha, through the 10 Hz sweet spot, down into theta. Default 20 minutes. Load an audio file to sync the sweep to your track's length.</li>
+            <li><strong>Gamma 40 Hz</strong> — a fixed 40 Hz tone, the rate used in gamma-stimulation research. 40 Hz light needs a fast (120 Hz+) display; on a 60 Hz screen the light can't show 40 Hz cleanly, so it stays steady while the audio runs at 40 Hz.</li>
+        </ul>
+
+        <h2>Audio file</h2>
+        <p>Load a local track (&#9835;) to play under the session — nothing leaves your browser. In Descent it sets the session length, and the first 60 seconds fade the strobe and tone in so your music leads.</p>
 
         <h2>Safety</h2>
-        <p>Flickering light can trigger seizures in photosensitive individuals (~1 in 4,000 people). This app is capped at 15 Hz to stay below the peak risk zone (16–20 Hz). Uses white/amber light — saturated red light at any flicker rate is more provocative and is avoided. <em>If you feel any discomfort, stop immediately.</em></p>
+        <p>Flickering light can trigger seizures in people with photosensitive epilepsy — risk is highest in roughly the 15–25 Hz range. Manual lets you dial into and above that band, so treat it with care. The light uses amber/white rather than the more provocative saturated red, and the slider can't exceed half your refresh rate (so there's no hidden aliasing to a lower, riskier rate); the 40 Hz Gamma rate sits above the peak-risk band. None of this removes the risk. <strong>Do not use this if you have epilepsy, a seizure history, or are photosensitive. If you feel any discomfort, stop immediately.</strong></p>
 
     </div>
 </div>
 
-<!-- ── Canvas ───────────────────────── -->
-<canvas id="canvas"></canvas>
+<!-- ── Stage ────────────────────────── -->
+<div id="stage"></div>
 <div id="hint"></div>
+<div id="notice"></div>
 
 <!-- ── Controls ─────────────────────── -->
 <div id="controls">
-    <!-- Row 1: Play, Frequency, Waveform -->
+    <!-- Row 1: Play, Light, Frequency (visual), Waveform, Audio method, Link -->
     <div class="ctrl-row">
         <button class="btn-play" id="btn-play" title="Play / Pause (Space)">&#9654;</button>
+        <button class="btn-toggle active" id="btn-visual" title="Light on / off — switch off the visual strobe for an audio-only session">Light</button>
         <div class="freq-group">
-            <input type="range" id="freq" min="4" max="15" step="0.1" value="10">
+            <input type="range" id="freq" min="1" max="30" step="0.1" value="10">
             <div class="freq-info">
                 <span class="freq-val" id="freq-val">10.0</span>
                 <span class="freq-unit">Hz</span>
                 <span class="freq-band" id="freq-band">ALPHA</span>
             </div>
         </div>
-        <select class="ctrl-select" id="sel-wave" title="Waveform">
-            <option value="sine">Sine</option>
-            <option value="square" selected>Square</option>
+        <select class="ctrl-select" id="sel-wave" title="Flicker waveform (visual). Square = sharpest transients / strongest drive; Sine = gentlest; Triangle ≈ the original slotted Dreamachine.">
+            <option value="sine" selected>Sine</option>
+            <option value="square">Square</option>
             <option value="triangle">Triangle</option>
         </select>
-    </div>
-    <!-- Row 2: Preset, Audio file, Vol, Timer, Info, FS -->
-    <div class="ctrl-row">
-        <select class="ctrl-select" id="sel-preset" title="Geometric patterns intensify through alpha, then dissolve into dreamlike imagery as you cross into theta">
-            <option value="custom">Custom</option>
-            <option value="descent">Descent</option>
+        <select class="ctrl-select" id="sel-audio" title="Audio entrainment method. Isochronic = strongest. Binaural needs headphones — it does nothing on speakers.">
+            <option value="isochronic" selected>Isochronic</option>
+            <option value="binaural">Binaural &#127911;</option>
+            <option value="monaural">Monaural</option>
+            <option value="off">Audio Off</option>
         </select>
+        <button class="btn-toggle active" id="btn-link" title="Link audio to the visual frequency. On = audio follows the light. Off = audio gets its own Hz slider.">Link</button>
+    </div>
+    <!-- Row 2: Mode, Audio Hz (when unlinked), Audio file, Vol, Timer, Info, FS -->
+    <div class="ctrl-row">
+        <select class="ctrl-select" id="sel-mode" title="Frequency program. Manual = free play with the slider. Descent = guided 12→4 Hz journey. Gamma = fixed 40 Hz (gamma-stimulation rate; 40 Hz light needs a 120 Hz+ display).">
+            <option value="manual" selected>Manual</option>
+            <option value="descent">Descent</option>
+            <option value="gamma">Gamma 40 Hz</option>
+        </select>
+        <div class="slider-group hidden" id="audio-freq-group">
+            <label>Audio Hz</label>
+            <input type="range" id="audio-freq" min="1" max="100" step="0.5" value="10">
+            <span class="val" id="audio-freq-val">10.0</span>
+        </div>
         <input type="file" id="audio-file" accept="audio/*" hidden>
         <button class="btn-icon" id="btn-upload" title="Pick audio file — Descent syncs to track length (local only, nothing leaves your browser)">&#9835;</button>
         <span class="audio-label" id="audio-label"></span>
@@ -355,33 +413,17 @@ input[type="range"]::-moz-range-thumb {
 
 <script>
 // ═══════════════════════════════════════════════
-//  SHADERS
-// ═══════════════════════════════════════════════
-const VERT = `attribute vec2 a_position;
-void main(){gl_Position=vec4(a_position,0.0,1.0);}`;
-
-const FRAG = {};
-
-// ── Pure flat strobe — no grain, no vignette, no per-pixel work ──
-FRAG.ganzflicker = `
-#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-uniform float u_flicker;
-uniform vec3  u_tint;
-void main(){
-    gl_FragColor=vec4(u_tint*u_flicker,1.0);
-}`;
-
-// ═══════════════════════════════════════════════
 //  AUDIO ENGINE
 // ═══════════════════════════════════════════════
-// Research basis:
-//   - Isochronic tones: strongest auditory entrainment (Ioannou et al. 2024)
-//   - 220 Hz carrier: low carriers produce 3x stronger ASSR (Ross et al. 2003)
-//   - Square envelope: up to 50% more effective (Ferraro et al. 2025)
+// Three auditory entrainment methods, all driven at the same beat
+// frequency as the visual flicker:
+//   - isochronic : single 220 Hz tone gated on/off at the beat rate.
+//                  Strongest cortical entrainment of the three.
+//   - monaural   : two tones (f, f+beat) summed in both channels — a
+//                  physical beat that also works on speakers.
+//   - binaural   : f in the left ear, f+beat in the right; the beat is a
+//                  perceptual illusion formed in the brainstem and REQUIRES
+//                  headphones. Weakest entrainment, but the classic method.
 class AudioEngine {
     constructor() {
         this.ctx = null;
@@ -389,6 +431,11 @@ class AudioEngine {
         this.carrierFreq = 220;
         this.beatFreq = 10;
         this.volume = 0.4;
+        this.mode = 'isochronic';
+        this.waveform = 'sine';     // shapes the isochronic AM envelope
+        this.toneNodes = null;      // live source nodes for the current mode
+        this.toneLfo = null;        // isochronic only
+        this.beatOsc = null;        // mono/binaural offset oscillator
         this.userAudioBuffer = null;
         this.userAudioNode = null;
         this.userAudioGain = null;
@@ -413,7 +460,13 @@ class AudioEngine {
         this.userAudioGain.gain.value = this.volume * 1.15;
         this.userAudioGain.connect(this.master);
 
-        this._createIsochronal();
+        // Persistent volume node for the entrainment tone; the per-mode
+        // source nodes connect into this.
+        this.toneGain = this.ctx.createGain();
+        this.toneGain.gain.value = this.volume;
+        this.toneGain.connect(this.toneEnvelope);
+
+        this._buildTone();
     }
 
     async loadAudioFile(file) {
@@ -469,30 +522,67 @@ class AudioEngine {
         return { lfo, smoother, scale };
     }
 
-    // ── Isochronal tone — 220 Hz carrier, waveform-synced AM ──
-    _createIsochronal() {
+    _lfoType() {
+        return (this.waveform === 'square')   ? 'square'
+             : (this.waveform === 'triangle') ? 'triangle'
+             : 'sine';
+    }
+
+    // ── Stop and disconnect the current mode's source nodes ──
+    _teardownTone() {
+        if (!this.toneNodes) return;
+        for (const n of this.toneNodes) {
+            try { if (n.stop) n.stop(); } catch (e) {}
+            try { n.disconnect(); } catch (e) {}
+        }
+        this.toneNodes = null;
+        this.toneLfo = null;
+        this.beatOsc = null;
+    }
+
+    // ── Build the source nodes for the current mode → toneGain ──
+    _buildTone() {
+        if (!this.ctx) return;
+        this._teardownTone();
+        if (this.mode === 'off') { this.toneNodes = []; return; }
+
         const ctx = this.ctx;
+        const c = this.carrierFreq;
+        const sine = f => { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f; return o; };
 
-        this.carrier = ctx.createOscillator();
-        this.carrier.type = 'sine';
-        this.carrier.frequency.value = this.carrierFreq;
+        if (this.mode === 'isochronic') {
+            const carrier = sine(c);
+            const amp = ctx.createGain();
+            amp.gain.value = 0.5;                 // base 0.5 ± 0.5 LFO → 0..1, full-depth AM
+            const chain = this._createSmoothedLfo(this.beatFreq, this._lfoType());
+            this.toneLfo = chain.lfo;
+            chain.scale.connect(amp.gain);
+            carrier.connect(amp);
+            amp.connect(this.toneGain);
+            carrier.start();
+            this.toneNodes = [carrier, chain.lfo, chain.smoother, chain.scale, amp];
 
-        this.toneAmp = ctx.createGain();
-        this.toneAmp.gain.value = 0.5;
+        } else if (this.mode === 'monaural') {
+            const o1 = sine(c), o2 = sine(c + this.beatFreq);
+            const mix = ctx.createGain();
+            mix.gain.value = 0.5;                 // sum of two sines → physical beat
+            o1.connect(mix); o2.connect(mix); mix.connect(this.toneGain);
+            o1.start(); o2.start();
+            this.beatOsc = o2;
+            this.toneNodes = [o1, o2, mix];
 
-        const toneLfoChain = this._createSmoothedLfo(this.beatFreq, 'square');
-        this.toneLfo = toneLfoChain.lfo;
-        this.toneLfoScale = toneLfoChain.scale;
-        toneLfoChain.scale.connect(this.toneAmp.gain);
-
-        this.toneGain = ctx.createGain();
-        this.toneGain.gain.value = this.volume;
-
-        this.carrier.connect(this.toneAmp);
-        this.toneAmp.connect(this.toneGain);
-        this.toneGain.connect(this.toneEnvelope);
-
-        this.carrier.start();
+        } else if (this.mode === 'binaural') {
+            const oL = sine(c), oR = sine(c + this.beatFreq);
+            const panL = ctx.createStereoPanner(); panL.pan.value = -1;
+            const panR = ctx.createStereoPanner(); panR.pan.value =  1;
+            const gL = ctx.createGain(); gL.gain.value = 0.5;
+            const gR = ctx.createGain(); gR.gain.value = 0.5;
+            oL.connect(gL); gL.connect(panL); panL.connect(this.toneGain);
+            oR.connect(gR); gR.connect(panR); panR.connect(this.toneGain);
+            oL.start(); oR.start();
+            this.beatOsc = oR;
+            this.toneNodes = [oL, oR, panL, panR, gL, gR];
+        }
     }
 
     async start(fadeIn) {
@@ -549,15 +639,19 @@ class AudioEngine {
     setFrequency(hz) {
         this.beatFreq = hz;
         if (!this.ctx) return;
-        this.toneLfo.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.05);
+        const t = this.ctx.currentTime;
+        if (this.toneLfo) this.toneLfo.frequency.setTargetAtTime(hz, t, 0.05);
+        if (this.beatOsc) this.beatOsc.frequency.setTargetAtTime(this.carrierFreq + hz, t, 0.05);
     }
 
     setWaveform(type) {
-        if (!this.ctx) return;
-        const t = (type === 'square') ? 'square'
-                : (type === 'triangle') ? 'triangle'
-                : 'sine';
-        this.toneLfo.type = t;
+        this.waveform = type;
+        if (this.toneLfo) this.toneLfo.type = this._lfoType();
+    }
+
+    setMode(mode) {
+        this.mode = mode;
+        if (this.ctx) this._buildTone();
     }
 
     setVolume(v) {
@@ -570,67 +664,25 @@ class AudioEngine {
 }
 
 // ═══════════════════════════════════════════════
-//  VISUAL ENGINE (WebGL)
+//  VISUAL ENGINE — flat full-field flicker
 // ═══════════════════════════════════════════════
+// The Dreamachine effect is a uniform full-screen strobe, so there is
+// nothing to draw per-pixel — we just paint one element's background.
+// The compositor handles solid fills efficiently at the display refresh.
 class VisualEngine {
-    constructor(canvas) {
-        this.canvas = canvas;
-        this.gl = canvas.getContext('webgl', { antialias: false, alpha: false });
-        if (!this.gl) { alert('WebGL is required.'); return; }
-        this.program = null;
-        this.tint = [1.0, 0.93, 0.82];
-        this._initGeometry();
-        this._compile();
-    }
-
-    _initGeometry() {
-        const gl = this.gl;
-        const buf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
-        this.vertBuf = buf;
-    }
-
-    _compile() {
-        const gl = this.gl;
-        const vs = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vs, VERT); gl.compileShader(vs);
-        const fs = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fs, FRAG.ganzflicker); gl.compileShader(fs);
-        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
-            console.error('ganzflicker', gl.getShaderInfoLog(fs)); return;
-        }
-        const prog = gl.createProgram();
-        gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-            console.error('ganzflicker', gl.getProgramInfoLog(prog)); return;
-        }
-        this.program = {
-            program: prog,
-            a_position: gl.getAttribLocation(prog, 'a_position'),
-            u_flicker:  gl.getUniformLocation(prog, 'u_flicker'),
-            u_tint:     gl.getUniformLocation(prog, 'u_tint'),
-        };
-    }
-
-    resize() {
-        const dpr = window.devicePixelRatio || 1;
-        this.canvas.width  = this.canvas.clientWidth  * dpr;
-        this.canvas.height = this.canvas.clientHeight * dpr;
-        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    constructor(el) {
+        this.el = el;
+        this.tint = [1.0, 0.93, 0.82]; // warm amber-white
+        this.last = -1;
     }
 
     render(flicker) {
-        if (!this.gl) return;
-        const gl = this.gl, p = this.program;
-        if (!p) return;
-        gl.useProgram(p.program);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuf);
-        gl.enableVertexAttribArray(p.a_position);
-        gl.vertexAttribPointer(p.a_position, 2, gl.FLOAT, false, 0, 0);
-        gl.uniform1f(p.u_flicker, flicker);
-        gl.uniform3f(p.u_tint, this.tint[0], this.tint[1], this.tint[2]);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        if (flicker === this.last) return; // skip redundant repaints
+        this.last = flicker;
+        const r = Math.round(255 * this.tint[0] * flicker);
+        const g = Math.round(255 * this.tint[1] * flicker);
+        const b = Math.round(255 * this.tint[2] * flicker);
+        this.el.style.backgroundColor = `rgb(${r},${g},${b})`;
     }
 }
 
@@ -638,27 +690,34 @@ class VisualEngine {
 //  DREAMACHINE — Main Controller
 // ═══════════════════════════════════════════════
 const TAU = Math.PI * 2;
-const FREQ_MIN = 4;
-const FREQ_MAX = 15;
-const DUTY_CYCLE = 0.3; // locked — optimal per Amaya et al. 2023
+const FREQ_MIN = 1;              // sandbox floor (delta range)
+const VISUAL_MAX_DEFAULT = 30;   // visual ceiling until refresh is measured (≈ refresh ÷ 2)
+const VISUAL_MAX_CAP = 120;      // absolute ceiling for the visual slider
+const AUDIO_MAX = 100;           // ceiling for the decoupled audio-rate slider
+const DUTY_CYCLE = 0.5;          // on-fraction for the square waveform
+const GAMMA_FREQ = 40;           // gamma-stimulation rate (as used in GENUS research)
+const GAMMA_MIN_REFRESH = 100;   // Hz — below this a 60 Hz-class display can't show
+                                 // 40 Hz light without aliasing into the seizure-risk band
 
 const BANDS = [
+    { max: 4,  name: 'DELTA', sym: "\u03B4" },
     { max: 8,  name: 'THETA', sym: "\u03B8" },
     { max: 13, name: 'ALPHA', sym: "\u03B1" },
-    { max: 15, name: 'BETA',  sym: "\u03B2" },
+    { max: 30, name: 'BETA',  sym: "\u03B2" },
+    { max: Infinity, name: 'GAMMA', sym: "\u03B3" },
 ];
 
 const PRESETS = {
-    descent: { startFreq: 12, endFreq: 4, duration: 1200, waveform: 'square' },
+    descent: { startFreq: 12, endFreq: 4, duration: 1200 },
 };
 
 class DreamMachine {
     constructor() {
         this.audio = new AudioEngine();
-        this.visual = new VisualEngine(document.getElementById('canvas'));
+        this.visual = new VisualEngine(document.getElementById('stage'));
         this.running = false;
         this.frequency = 10;
-        this.waveform = 'square';
+        this.waveform = 'sine';
 
         this.timerDuration = 0;
         this.timerElapsed = 0;
@@ -672,14 +731,21 @@ class DreamMachine {
         this.fadeIn = false;
         this.fadeInStart = 0;
         this.hasUserAudio = false;
+        this.program = 'manual';    // 'manual' | 'descent' | 'gamma'
+        this.fps = 60;              // measured display refresh (EMA)
+        this._gammaSteady = false;  // 40 Hz light suppressed on a slow display
+        this.visualOn = true;       // Light toggle
+        this.audioLinked = true;    // audio rate follows the visual frequency
+        this.audioFreq = 10;        // independent audio rate when unlinked
+        this.visualMax = VISUAL_MAX_DEFAULT;  // slider ceiling, set from measured refresh
+        this._refreshLocked = false;
+        this._rfFrames = 0;
 
         this._setupWarning();
         this._setupControls();
         this._setupKeys();
         this._setupAutoHide();
         this._setupInfo();
-        this.visual.resize();
-        window.addEventListener('resize', () => this.visual.resize());
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && this.running) this._requestWakeLock();
         });
@@ -713,21 +779,47 @@ class DreamMachine {
 
         $('btn-play').onclick = () => this.toggle();
 
-        // Frequency
+        // Visual frequency — dragging the slider drops back to Manual
         $('freq').oninput = () => {
+            this._exitToManual();
             this.frequency = parseFloat($('freq').value);
             this._updateFreqUI();
-            this.audio.setFrequency(this.frequency);
-            $('sel-preset').value = 'custom';
-            this.journey = null;
+            this._syncAudio();
         };
 
-        // Waveform (synced: visual flicker + audio AM envelope)
+        // Waveform (visual flicker; also shapes the isochronic AM envelope)
         $('sel-wave').onchange = e => {
             this.waveform = e.target.value;
             this.audio.setWaveform(this.waveform);
-            $('sel-preset').value = 'custom';
-            this.journey = null;
+        };
+
+        // Audio entrainment method
+        $('sel-audio').onchange = e => this.audio.setMode(e.target.value);
+
+        // Light on/off — kill the visual strobe for an audio-only session
+        $('btn-visual').onclick = () => {
+            this.visualOn = !this.visualOn;
+            $('btn-visual').classList.toggle('active', this.visualOn);
+        };
+
+        // Link — audio follows the visual frequency, or gets its own slider
+        $('btn-link').onclick = () => {
+            this.audioLinked = !this.audioLinked;
+            $('btn-link').classList.toggle('active', this.audioLinked);
+            $('audio-freq-group').classList.toggle('hidden', this.audioLinked);
+            if (!this.audioLinked) {                  // start the free rate where the visual is
+                this.audioFreq = this.frequency;
+                $('audio-freq').value = this.audioFreq;
+                $('audio-freq-val').textContent = this.audioFreq.toFixed(1);
+            }
+            this._syncAudio();
+        };
+
+        // Independent audio rate (shown only when unlinked)
+        $('audio-freq').oninput = e => {
+            this.audioFreq = parseFloat(e.target.value);
+            $('audio-freq-val').textContent = this.audioFreq.toFixed(1);
+            if (!this.audioLinked) this._syncAudio();
         };
 
         // Volume
@@ -744,15 +836,25 @@ class DreamMachine {
                 const label = $('audio-label');
                 label.textContent = file.name;
                 label.classList.add('has-file');
-                // If Descent is already selected, restart with the new audio
-                if ($('sel-preset').value === 'descent') this._applyPreset('descent');
+                // If a descent is running, restart it synced to the new track
+                if (this.program === 'descent') this._startDescent();
             } catch (err) {
                 console.error('Failed to decode audio file:', err);
             }
         };
 
-        // Preset
-        $('sel-preset').onchange = e => this._applyPreset(e.target.value);
+        // Mode — Manual / Descent / Gamma
+        $('sel-mode').onchange = e => {
+            const m = e.target.value;
+            if (m === 'descent') this._startDescent();
+            else if (m === 'gamma') this._startGamma();
+            else {
+                this._exitToManual();
+                this.frequency = parseFloat($('freq').value);
+                this._updateFreqUI();
+                this._syncAudio();
+            }
+        };
 
         // Timer
         $('sel-timer').onchange = e => {
@@ -768,31 +870,43 @@ class DreamMachine {
         const band = BANDS.find(b => this.frequency <= b.max) || BANDS[BANDS.length - 1];
         document.getElementById('freq-val').textContent = this.frequency.toFixed(1);
         document.getElementById('freq-band').textContent = band.sym + ' ' + band.name;
-        document.getElementById('freq').value = this.frequency;
+        // Keep the slider synced except in Gamma, whose 40 Hz is off the slider scale
+        if (this.program !== 'gamma') document.getElementById('freq').value = this.frequency;
     }
 
-    _applyPreset(key) {
-        if (key === 'custom' || !PRESETS[key]) { this.journey = null; this.fadeIn = false; return; }
-        const p = PRESETS[key];
+    // Drive the audio at the linked visual rate, or its own rate when unlinked
+    _syncAudio() {
+        this.audio.setFrequency(this.audioLinked ? this.frequency : this.audioFreq);
+    }
+
+    // ── Frequency programs (Manual / Descent / Gamma) ──
+    _exitToManual() {
+        this.program = 'manual';
+        document.getElementById('sel-mode').value = 'manual';
+        this.journey = null;
+        this.fadeIn = false;
+        this._hideNotice();
+    }
+
+    _startDescent() {
+        this.program = 'descent';
+        document.getElementById('sel-mode').value = 'descent';
+        this._hideNotice();
         const $ = id => document.getElementById(id);
+        const p = PRESETS.descent;
 
         // If user audio is loaded, sync descent duration to track length
         const audioDur = this.audio.getUserAudioDuration();
         const duration = (this.hasUserAudio && audioDur > 0) ? audioDur : p.duration;
 
-        this.journey = { ...p, duration };
+        this.journey = { startFreq: p.startFreq, endFreq: p.endFreq, duration };
         this.journeyStart = performance.now() / 1000;
         this.frequency = p.startFreq;
         this._updateFreqUI();
-        this.audio.setFrequency(this.frequency);
-
-        this.waveform = p.waveform;
-        $('sel-wave').value = p.waveform;
-        this.audio.setWaveform(p.waveform);
+        this._syncAudio();
 
         this.timerDuration = duration;
         this.timerElapsed = 0;
-        // Match dropdown if a standard value, otherwise just show countdown
         const match = [...$('sel-timer').options].find(o => parseInt(o.value, 10) === Math.round(duration));
         $('sel-timer').value = match ? match.value : '0';
 
@@ -802,6 +916,33 @@ class DreamMachine {
 
         if (!this.running) this.toggle();
         else if (this.fadeIn) this.audio.start(true); // restart with fade-in
+    }
+
+    _startGamma() {
+        this.program = 'gamma';
+        document.getElementById('sel-mode').value = 'gamma';
+        this.journey = null;
+        this.fadeIn = false;
+        this.frequency = GAMMA_FREQ;
+        this._updateFreqUI();
+        this._syncAudio();
+        this._updateGammaNotice();
+        if (!this.running) this.toggle();
+    }
+
+    // ── Notice toast ───────────────────
+    _updateGammaNotice() {
+        if (this.program === 'gamma' && this.fps < GAMMA_MIN_REFRESH)
+            this._showNotice('40 Hz light needs a 120 Hz+ display — showing steady light; audio is running at 40 Hz.');
+        else
+            this._hideNotice();
+    }
+    _showNotice(msg) {
+        const n = document.getElementById('notice');
+        n.textContent = msg; n.classList.add('visible');
+    }
+    _hideNotice() {
+        document.getElementById('notice').classList.remove('visible');
     }
 
     // ── Keyboard ───────────────────────
@@ -818,13 +959,13 @@ class DreamMachine {
                 case ' ':
                     e.preventDefault(); this.toggle(); break;
                 case 'ArrowUp': case 'ArrowRight':
-                    e.preventDefault();
-                    this.frequency = Math.min(FREQ_MAX, this.frequency + 0.5);
-                    this._updateFreqUI(); this.audio.setFrequency(this.frequency); break;
+                    e.preventDefault(); this._exitToManual();
+                    this.frequency = Math.min(this.visualMax, parseFloat(document.getElementById('freq').value) + 0.5);
+                    this._updateFreqUI(); this._syncAudio(); break;
                 case 'ArrowDown': case 'ArrowLeft':
-                    e.preventDefault();
-                    this.frequency = Math.max(FREQ_MIN, this.frequency - 0.5);
-                    this._updateFreqUI(); this.audio.setFrequency(this.frequency); break;
+                    e.preventDefault(); this._exitToManual();
+                    this.frequency = Math.max(FREQ_MIN, parseFloat(document.getElementById('freq').value) - 0.5);
+                    this._updateFreqUI(); this._syncAudio(); break;
                 case 'f': case 'F': this._toggleFS(); break;
                 case '?': document.getElementById('info-overlay').classList.add('visible'); break;
             }
@@ -906,6 +1047,18 @@ class DreamMachine {
         const now = performance.now() / 1000;
         const dt = now - this.lastTick;
         this.lastTick = now;
+        if (dt > 0 && dt < 0.5) this.fps = this.fps * 0.9 + (1 / dt) * 0.1;
+
+        // Lock the visual ceiling to half the measured refresh (Nyquist: flicker
+        // faster than this can't be shown without aliasing into a lower rate).
+        if (!this._refreshLocked && ++this._rfFrames >= 120) {
+            this._refreshLocked = true;
+            this.visualMax = Math.min(VISUAL_MAX_CAP, Math.max(20, Math.round(this.fps / 2)));
+            document.getElementById('freq').max = this.visualMax;
+            if (this.program === 'manual' && this.frequency > this.visualMax) {
+                this.frequency = this.visualMax; this._updateFreqUI(); this._syncAudio();
+            }
+        }
 
         if (this.running) {
 
@@ -920,12 +1073,9 @@ class DreamMachine {
                 if (newFreq !== this.frequency) {
                     this.frequency = newFreq;
                     this._updateFreqUI();
-                    this.audio.setFrequency(this.frequency);
+                    this._syncAudio();
                 }
-                if (t >= 1) {
-                    this.journey = null;
-                    document.getElementById('sel-preset').value = 'custom';
-                }
+                if (t >= 1) this._exitToManual();
             }
 
             // Timer
@@ -944,24 +1094,33 @@ class DreamMachine {
             }
         }
 
-        // ── Flicker calculation ────────
-        if (this.running) this.visualPhase = (this.visualPhase + this.frequency * dt) % 1;
-        const phase = this.visualPhase;
-        let raw;
+        // ── Gamma on a slow display: a 40 Hz strobe would alias into the
+        //    seizure-risk band, so suppress it and show steady light instead.
+        const gammaSteady = this.program === 'gamma' && this.fps < GAMMA_MIN_REFRESH;
+        if (gammaSteady !== this._gammaSteady) { this._gammaSteady = gammaSteady; this._updateGammaNotice(); }
 
-        if (this.waveform === 'square') {
-            raw = phase < DUTY_CYCLE ? 1.0 : 0.0;
-        } else if (this.waveform === 'triangle') {
-            raw = 1.0 - Math.abs(2.0 * phase - 1.0);
+        // ── Flicker calculation ────────
+        let raw;
+        if (!this.visualOn) {
+            raw = 0;                                    // Light off → audio-only session
+        } else if (gammaSteady) {
+            raw = 0.6;                                  // steady soft field
         } else {
-            raw = 0.5 + 0.5 * Math.sin(TAU * phase);
+            if (this.running) this.visualPhase = (this.visualPhase + this.frequency * dt) % 1;
+            const phase = this.visualPhase;
+            if (this.waveform === 'square') {
+                raw = phase < DUTY_CYCLE ? 1.0 : 0.0;
+            } else if (this.waveform === 'triangle') {
+                raw = 1.0 - Math.abs(2.0 * phase - 1.0);
+            } else {
+                raw = 0.5 + 0.5 * Math.sin(TAU * phase);
+            }
         }
 
-        // Apply 60s visual fade-in when user audio is driving descent
+        // 60s visual fade-in when user audio is driving the descent
         let intensity = 1;
         if (this.fadeIn && this.running) {
-            const fadeElapsed = now - this.fadeInStart;
-            intensity = Math.min(1, fadeElapsed / 60);
+            intensity = Math.min(1, (now - this.fadeInStart) / 60);
         }
 
         const flicker = this.running ? raw * intensity : 0.05;
